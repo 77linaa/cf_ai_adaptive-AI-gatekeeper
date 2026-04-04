@@ -1,0 +1,19 @@
+name = "adaptive-ai-gatekeeper"
+main = "src/worker.js"
+compatibility_date = "2026-03-27"
+compatibility_flags = ["nodejs_compat"]
+
+[ai]
+binding = "AI"
+
+[[durable_objects.bindings]]
+name = "GATEKEEPER"
+class_name = "GatekeeperState"
+
+[[migrations]] 
+tag = "v3"
+new_sqlite_classes = ["GatekeeperState"]
+
+[assets] 
+directory = "./dist"
+
