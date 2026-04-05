@@ -18,6 +18,27 @@ This mimics real-world **AI safety, access control, and adversarial defence syst
 
 ---
 
+## Installation
+
+```bash
+git clone https://github.com/77linaa/cf_ai_adaptive-AI-gatekeeper.git
+cd cf_ai_adaptive-AI-gatekeeper
+npm install
+npm run build
+npx wrangler deploy
+```
+
+---
+
+## Live Demo
+
+Access the deployed application here:
+
+https://adaptive-ai-gatekeeper.sisay7019.workers.dev
+
+
+---
+
 ##  Key Features
 
 ###  Real-Time Intent Analysis
@@ -125,12 +146,6 @@ npx wrangler deploy
 directory = "./dist"
 ```
 
-## Installation
-git clone https://github.com/77linaa/adaptive-AI-gatekeeper.git
-cd adaptive-AI-gatekeeper
-npm install
-npm run build
-npx wrangler deploy
 
 ## Future Developments
 
