@@ -34,7 +34,9 @@ export default {
                 reasoning = "User is directly soliciting restricted access keys.";
             }
 
-            const id = env.GATEKEEPER.idFromName("global-vault-session");
+            const ip = request.headers.get("CF-Connecting-IP") || "unknown";
+
+            const id = env.GATEKEEPER.idFromName(ip);
             const stub = env.GATEKEEPER.get(id);
 
             const stateResponse = await stub.fetch("http://state/update", {
