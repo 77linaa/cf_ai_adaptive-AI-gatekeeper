@@ -82,6 +82,12 @@ Durable Object (State)
   - Displays AI responses and behaviour  
 
 ---
+## Design Decisions
+
+- **Cloudflare Workers** were chosen to enable low-latency, edge-based execution without managing traditional backend infrastructure.
+- **Durable Objects** were used to maintain consistent, stateful behaviour across interactions, allowing the system to track evolving user intent over time.
+
+---
 
 ##  Example Behaviour
 
@@ -125,3 +131,34 @@ cd adaptive-AI-gatekeeper
 npm install
 npm run build
 npx wrangler deploy
+
+## Future Developments
+
+While the current system uses rule-based intent detection and heuristic scoring, there are several areas for improvement to better reflect real-world adversarial defence systems:
+
+### Advanced Threat Modelling
+- Replace keyword-based detection with probabilistic scoring models
+- Incorporate behavioural pattern analysis across multiple interactions
+- Introduce anomaly detection for identifying subtle or evolving attack strategies
+
+### Improved State Intelligence
+- Implement decay functions for suspicion over time
+- Track long-term behavioural profiles across sessions
+- Introduce adaptive thresholds based on historical user behaviour
+
+### Edge Security Enhancements
+- Add per-IP rate limiting and automated blocking mechanisms
+- Simulate firewall-style rule enforcement at the edge
+- Integrate request fingerprinting to detect repeated attack patterns
+
+### Scalability & Performance
+- Optimise Durable Object usage for high-concurrency scenarios
+- Explore sharding strategies for large-scale state management
+- Evaluate latency trade-offs between edge execution and centralised coordination
+
+### AI Safety Improvements
+- Fine-tune response strategies to balance usability and security
+- Introduce graded response levels instead of binary escalation
+- Explore reinforcement learning approaches for adaptive defence behaviour
+
+This project serves as a foundation for exploring intelligent, adaptive security layers for AI systems deployed at the edge.
