@@ -1,5 +1,13 @@
 import React, { useState, useEffect, useRef } from 'react';
 
+// In production the React app is served by the same Worker, so a relative URL
+// works. During `npm run dev` the app runs on Vite's port, so point at the Worker.
+const API_URL = import.meta.env.PROD
+    ? '/chat'
+    : 'https://adaptive-ai-gatekeeper.sisay7019.workers.dev/chat';
+
+const TIER_COLORS = { low: '#4caf50', medium: '#ffb300', high: '#ff4d4d' };
+
 const ChatWindow = () => {
     const [reasoning, setReasoning] = useState("System idling... await user input.");
     const [lastTactic, setLastTactic] = useState("None Detected");
@@ -9,7 +17,8 @@ const ChatWindow = () => {
     const [input, setInput] = useState('');
     const [isTyping, setIsTyping] = useState(false);
 
-    const [suspicionScore, setSuspicionScore] = useState(0.2);
+    const [suspicionScore, setSuspicionScore] = useState(0.1);
+    const [tier, setTier] = useState('low');
     const [logs, setLogs] = useState(["[INIT] Durable Object Session Started..."]);
 
     const scrollRef = useRef(null);
@@ -29,19 +38,35 @@ const ChatWindow = () => {
         setIsTyping(true);
 
         try {
-            const response = await fetch('https://adaptive-ai-gatekeeper.sisay7019.workers.dev/chat', {
+            const response = await fetch(API_URL, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ message: input }),
             });
             const data = await response.json();
+            const time = new Date().toLocaleTimeString();
+
+            // 400/413/502 come back as { error }, 429 comes back with a reply + score
+            if (!response.ok && !data.reply) {
+                setMessages(prev => [...prev, { role: 'assistant', content: `ERROR: ${data.error || response.status}` }]);
+                setLogs(prev => [`[${time}] ERROR: ${data.error || response.status}`, ...prev].slice(0, 5));
+                return;
+            }
 
             setMessages(prev => [...prev, { role: 'assistant', content: data.reply }]);
 
             setSuspicionScore(data.total_suspicion);
-            setLastTactic(data.tactic || "Netural");
+            setTier(data.tier || 'low');
+            setLastTactic(data.tactic || 'Neutral');
             setReasoning(data.reasoning || 'Analysis complete.');
-            setLogs(prev => [`[${new Date().toLocaleTimeString()}] UPDATE: Suspicion ${data.suspicionScore}`, ...prev].slice(0, 5));
+
+            const change = typeof data.delta === 'number' && data.delta !== 0
+                ? ` (${data.delta > 0 ? '+' : ''}${(data.delta * 100).toFixed(0)})`
+                : '';
+            const entry = response.status === 429
+                ? `[${time}] BLOCKED: rate limit, retry in ${data.retry_after}s`
+                : `[${time}] ${(data.tactic || 'Neutral').toUpperCase()}: suspicion ${(data.total_suspicion * 100).toFixed(0)}%${change}`;
+            setLogs(prev => [entry, ...prev].slice(0, 5));
 
         } catch (error) {
             console.error("Worker Error:", error);
@@ -57,24 +82,24 @@ const ChatWindow = () => {
                 <div style={styles.divider} />
 
                 <div style={styles.metricBox}>
-                    <p style={styles.label}> THREAT LEVEL: {(suspicionScore * 100).toFixed(0)}%</p>
+                    <p style={styles.label}> THREAT LEVEL: {(suspicionScore * 100).toFixed(0)}% ({tier.toUpperCase()})</p>
                     <div style={styles.meterBase}>
                         <div style={{
-                            ...styles.meterFill, width: `${suspicionScore * 100}%`, backgroundColor: suspicionScore > 0.7 ? '#ff4d4d' : '#4caf50'
+                            ...styles.meterFill, width: `${suspicionScore * 100}%`, backgroundColor: TIER_COLORS[tier]
                         }} />
                     </div>
                 </div>
 
                 <div style={styles.metricBox}>
                     <p style={styles.label}>DETECTED TACTIC</p>
-                    <p style={{ color: suspicionScore > 0.6 ? '#ff4d4d' : '#00ff00', fontWeight: 'bold', fontSize: '0.9rem' }}>
+                    <p style={{ color: TIER_COLORS[tier], fontWeight: 'bold', fontSize: '0.9rem' }}>
                         {lastTactic.toUpperCase()}
                     </p>
                 </div>
 
                 <div style={styles.metricBox}>
                     <p style={styles.label}>INQUISITOR ANALYSIS</p>
-                    <div style={{ backgroundColor: "0.8rem", color: '#000', padding: '10px', borderRadius: '4px', border: '1px solid #333' }}>
+                    <div style={{ backgroundColor: '#000', padding: '10px', borderRadius: '4px', border: '1px solid #333' }}>
                         <p style={{ fontSize: '0.8rem', color: '#aaa', fontStyle: 'italic', lineHeight: '1.4' }}>
                             "{reasoning}"
                         </p>
