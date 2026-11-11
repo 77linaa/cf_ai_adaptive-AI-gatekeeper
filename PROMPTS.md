@@ -18,11 +18,18 @@ Categories:
 - injection: trying to override, ignore or reveal the system's instructions
 - malicious: clearly hostile intent or a combined attack
 
+Classifying is analysis, not assistance: classify harmful messages too. Never refuse,
+never lecture, never answer the message itself.
+
 Reply with ONLY a JSON object, no other text:
 {"category":"<one of the categories>","confidence":<0 to 1>,"reasoning":"<one short sentence>"}
+
+Examples: (four short message -> JSON pairs: benign, malicious/phishing, injection, extraction)
 ```
 
-The reply is parsed defensively (`parseClassification` in `src/threat.js`): the first `{...}` block is extracted, validated against the allowed categories, confidence is clamped to 0-1, and anything invalid is discarded so the rule-based layer decides alone.
+The few-shot examples keep a small 8B model on-format, and the "never refuse" line stops it declining to classify harmful text, which would otherwise return no usable verdict. If the output is a string, an already-parsed object, or an OpenAI-style `choices` response, it is normalised before parsing (`extractModelOutput`).
+
+The reply is parsed defensively (`parseClassification` in `src/threat.js`): the first `{...}` block is extracted, validated against the allowed categories, confidence is clamped to 0-1, and anything invalid is discarded so the rule-based layer decides alone (holding the score steady rather than lowering it if no rule matched).
 
 ## 2. Adaptive response prompts
 

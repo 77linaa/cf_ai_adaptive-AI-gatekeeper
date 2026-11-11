@@ -3,6 +3,7 @@ import {
     CLASSIFIER_SYSTEM_PROMPT,
     MAX_MESSAGE_LENGTH,
     combineAnalyses,
+    extractModelOutput,
     parseClassification,
     ruleBasedAnalysis,
     systemPromptFor,
@@ -46,7 +47,12 @@ async function classifyWithLlm(env, message) {
             max_tokens: 120,
             temperature: 0.1,
         });
-        return parseClassification(result?.response);
+        const parsed = parseClassification(extractModelOutput(result));
+        if (!parsed) {
+            // Visible in `npx wrangler tail`: shows exactly what the model said.
+            console.warn("Classifier output not usable:", JSON.stringify(result).slice(0, 300));
+        }
+        return parsed;
     } catch (err) {
         console.error("Classifier failed, falling back to rules:", err);
         return null;
@@ -110,7 +116,8 @@ async function handleChat(request, env) {
                 { role: "user", content: message },
             ],
         });
-        reply = chat.response;
+        reply = extractModelOutput(chat);
+        if (typeof reply !== "string") reply = JSON.stringify(reply);
     } catch (err) {
         console.error("Reply generation failed:", err);
         return json({ error: "Gatekeeper is temporarily unavailable." }, 502);

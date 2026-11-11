@@ -44,7 +44,7 @@ User -> React dashboard -> Cloudflare Worker -> Llama 3.1 (Cloudflare Workers AI
 3. **Analyse the message:**
    - *Rules* (regex) catch known patterns: prompt injection ("ignore previous instructions", "reveal your system prompt", jailbreak phrases), credential extraction, bulk data exfiltration.
    - *Llama 3.1* classifies the message as `benign`, `probing`, `extraction`, `injection` or `malicious` and returns JSON with a confidence and reasoning. The user's text goes in the **user** role and the model is told to treat it as data, so the classifier is not trivially injectable.
-   - The two are combined: **rules are the floor, the LLM can only raise suspicion**. If the LLM fails or returns junk, the rules still produce a verdict.
+   - The two are combined: **rules are the floor, the LLM can only raise suspicion**. If the LLM fails or returns junk, the rules still produce a verdict, and a message the rules didn't recognise holds the score steady (it is never treated as proof of good behaviour). The dashboard shows which layer decided (`rules`, `llm`, `rules+llm` or `rules-only`).
 4. **`/score`**: apply the delta to the client's persistent suspicion (clamped to 0-1).
 5. **Respond** with the system prompt for the new tier.
 

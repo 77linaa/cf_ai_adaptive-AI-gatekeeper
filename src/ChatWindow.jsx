@@ -65,7 +65,7 @@ const ChatWindow = () => {
                 : '';
             const entry = response.status === 429
                 ? `[${time}] BLOCKED: rate limit, retry in ${data.retry_after}s`
-                : `[${time}] ${(data.tactic || 'Neutral').toUpperCase()}: suspicion ${(data.total_suspicion * 100).toFixed(0)}%${change}`;
+                : `[${time}] ${(data.tactic || 'Neutral').toUpperCase()} [${data.source || 'n/a'}]: suspicion ${(data.total_suspicion * 100).toFixed(0)}%${change}`;
             setLogs(prev => [entry, ...prev].slice(0, 5));
 
         } catch (error) {
