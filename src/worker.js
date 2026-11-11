@@ -8,7 +8,8 @@ import {
     systemPromptFor,
 } from "./threat.js";
 
-const MODEL = "@cf/meta/llama-3-8b-instruct";
+// Llama 3.1 8B "fast". The original @cf/meta/llama-3-8b-instruct was retired by Cloudflare on 2026-05-30.
+const MODEL = "@cf/meta/llama-3.1-8b-instruct-fast";
 
 const CORS_HEADERS = {
     "Access-Control-Allow-Origin": "*",

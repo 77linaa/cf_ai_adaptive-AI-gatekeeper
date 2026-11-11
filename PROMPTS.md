@@ -1,6 +1,6 @@
 # AI Prompts Used
 
-The system uses Llama 3 (`@cf/meta/llama-3-8b-instruct`) in two separate roles. They are kept apart on purpose: the model that **judges** the message never writes the reply, and the model that **replies** never decides the score.
+The system uses Llama 3.1 8B (`@cf/meta/llama-3.1-8b-instruct-fast`) in two separate roles. They are kept apart on purpose: the model that **judges** the message never writes the reply, and the model that **replies** never decides the score.
 
 ## 1. Threat classifier
 
